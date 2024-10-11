@@ -15,7 +15,7 @@ func initDb() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	dbFile := filepath.Join(filepath.Dir(appPath), "scheduler.db")
+	dbFile := filepath.Join(filepath.Dir(appPath), "scheduler.db") // TODO: customize dbfile with env variable
 	_, err = os.Stat(dbFile)
 
 	var needSetup bool
