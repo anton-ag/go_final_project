@@ -3,6 +3,7 @@ package main
 import "net/http"
 
 func main() {
+	initDb()
 	mux := http.NewServeMux()
 
 	// file web server
