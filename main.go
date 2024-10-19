@@ -1,15 +1,25 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+)
 
 func main() {
+	// initialize database or use existent
 	initDb()
-	mux := http.NewServeMux()
 
-	// file web server
-	mux.Handle("/", http.FileServer(http.Dir("web")))
+	// router
+	r := chi.NewRouter()
 
-	err := http.ListenAndServe(":7540", mux) // TODO: get port from env variables
+	fs := http.FileServer(http.Dir("web"))
+	r.Handle("/*", http.StripPrefix("/", fs))
+
+	r.Get("/api/nextdate", NextDateHandler)
+
+	// launch server
+	err := http.ListenAndServe(":7540", r) // TODO: get port from env variables
 	if err != nil {
 		panic(err)
 	}
