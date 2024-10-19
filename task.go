@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const DateFormat = "20060102"
+const DateFormat = "20060102" // TODO: move to another block
 
 func NextDate(now time.Time, date string, repeat string) (string, error) {
 	if repeat == "" {
