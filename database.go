@@ -36,3 +36,15 @@ func initDb() {
 		}
 	}
 }
+
+func addTask(db *sql.DB, task Task) (int64, error) {
+	res, err := db.Exec("INSERT INTO scheduler (date, title, comment, repeat) VALUES (?, ?, ?, ?)", task.Date, task.Title, task.Comment, task.Repeat)
+	if err != nil {
+		return 0, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
