@@ -10,6 +10,8 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+const Limit = 50
+
 func initDb() {
 	appPath, err := os.Executable()
 	if err != nil {
@@ -47,4 +49,28 @@ func addTask(db *sql.DB, task Task) (int64, error) {
 		return 0, err
 	}
 	return id, nil
+}
+
+func getTasks(db *sql.DB) ([]Task, error) {
+	var task Task
+	var tasks []Task
+
+	rows, err := db.Query("SELECT id, date, title, comment, repeat FROM scheduler ORDER BY date LIMIT :limit", sql.Named("limit", Limit))
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		err := rows.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	}
+	if err = rows.Close(); err != nil {
+		return []Task{}, err
+	}
+	if len(tasks) == 0 {
+		return []Task{}, err
+	}
+	return tasks, nil
 }

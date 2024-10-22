@@ -27,6 +27,7 @@ func main() {
 
 	r.Get("/api/nextdate", NextDateHandler)
 	r.Post("/api/task", NewTaskHandler(db))
+	r.Get("/api/tasks", GetTasksHandler(db))
 
 	// launch server
 	err = http.ListenAndServe(":7540", r) // TODO: get port from env variables
