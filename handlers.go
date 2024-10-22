@@ -19,6 +19,10 @@ type IDResponse struct {
 	ID string `json:"id"`
 }
 
+type TasksResponse struct {
+	Tasks []Task `json:"tasks"`
+}
+
 func respondError(w http.ResponseWriter, s string) {
 	body, _ := json.Marshal(ErrorResponse{Error: s})
 	w.WriteHeader(http.StatusBadRequest)
@@ -116,5 +120,28 @@ func NewTaskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 
 		idS := strconv.Itoa(int(id))
 		respondOk(w, idS)
+	}
+}
+
+func GetTasksHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+		db, err := sql.Open("sqlite", "scheduler.db")
+		if err != nil {
+			respondError(w, "Ошибка подключения к базе данных")
+			return
+		}
+		defer db.Close()
+
+		// TODO: add search parameter
+		tasks, err := getTasks(db)
+		if err != nil {
+			respondError(w, err.Error())
+			return
+		}
+		body, _ := json.Marshal(TasksResponse{Tasks: tasks})
+		w.WriteHeader(http.StatusOK)
+		w.Write(body)
 	}
 }
