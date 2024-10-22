@@ -12,6 +12,8 @@ import (
 
 const Limit = 50
 
+// TODO: add separate query := statement
+
 func initDb() {
 	appPath, err := os.Executable()
 	if err != nil {
@@ -73,4 +75,15 @@ func getTasks(db *sql.DB) ([]Task, error) {
 		return []Task{}, err
 	}
 	return tasks, nil
+}
+
+func getTaskByID(db *sql.DB, id string) (Task, error) {
+	var task Task
+
+	row := db.QueryRow("SELECT id, date, title, comment, repeat FROM scheduler WHERE id = :id", sql.Named("id", id))
+	err := row.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat)
+	if err != nil {
+		return Task{}, err
+	}
+	return task, nil
 }

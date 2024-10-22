@@ -145,3 +145,31 @@ func GetTasksHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 		w.Write(body)
 	}
 }
+
+func GetTaskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		id := r.URL.Query().Get("id")
+		if len(id) == 0 {
+			respondError(w, "Пустой ID")
+			return
+		}
+
+		db, err := sql.Open("sqlite", "scheduler.db")
+		if err != nil {
+			respondError(w, "Ошибка подключения к базе данных")
+			return
+		}
+		defer db.Close()
+
+		task, err := getTaskByID(db, id)
+		if err != nil {
+			respondError(w, "Задача с данным ID не найдена")
+			return
+		}
+
+		body, _ := json.Marshal(task)
+		w.WriteHeader(http.StatusOK)
+		w.Write(body)
+	}
+}
