@@ -199,6 +199,12 @@ func PutTaskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		_, err = getTaskByID(db, task.ID)
+		if err != nil {
+			respondError(w, "Задача с данным ID не найдена")
+			return
+		}
+
 		_, err = strconv.Atoi(task.ID)
 		if err != nil {
 			respondError(w, "Неверный ID")
