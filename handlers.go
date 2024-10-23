@@ -199,13 +199,15 @@ func PutTaskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if task.Title == "" {
-			respondError(w, "Не указан заголовок задачи")
+		_, err = strconv.Atoi(task.ID)
+		if err != nil {
+			respondError(w, "Неверный ID")
 			return
 		}
 
-		if task.Date == "" || task.Date < now.Format(DateFormat) {
-			task.Date = now.Format(DateFormat)
+		if task.Title == "" {
+			respondError(w, "Не указан заголовок задачи")
+			return
 		}
 
 		if _, err = time.Parse(DateFormat, task.Date); err != nil {
