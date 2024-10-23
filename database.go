@@ -12,6 +12,8 @@ import (
 
 const Limit = 50
 
+// TODO: add separate query := statement
+
 func initDb() {
 	appPath, err := os.Executable()
 	if err != nil {
@@ -73,4 +75,35 @@ func getTasks(db *sql.DB) ([]Task, error) {
 		return []Task{}, err
 	}
 	return tasks, nil
+}
+
+func getTaskByID(db *sql.DB, id string) (Task, error) {
+	var task Task
+
+	row := db.QueryRow("SELECT id, date, title, comment, repeat FROM scheduler WHERE id = :id", sql.Named("id", id))
+	err := row.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat)
+	if err != nil {
+		return Task{}, err
+	}
+	return task, nil
+}
+
+func updateTask(db *sql.DB, task Task) (int64, error) {
+	query := "UPDATE scheduler SET id = :id, date = :date, title = :title, comment= :comment, repeat= :repeat WHERE id = :id"
+	res, err := db.Exec(
+		query,
+		sql.Named("id", task.ID),
+		sql.Named("date", task.Date),
+		sql.Named("title", task.Title),
+		sql.Named("comment", task.Comment),
+		sql.Named("repeat", task.Repeat),
+	)
+	if err != nil {
+		return 0, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }

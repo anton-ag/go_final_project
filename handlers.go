@@ -67,7 +67,7 @@ func NewTaskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 		now := time.Now()
 		db, err := sql.Open("sqlite", "scheduler.db")
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			respondError(w, "Ошибка подключения к базе данных")
 			return
 		}
 		defer db.Close()
@@ -82,7 +82,7 @@ func NewTaskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err = json.Unmarshal(buf.Bytes(), &task); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			respondError(w, "Неверный формат запроса")
 			return
 		}
 
@@ -107,7 +107,7 @@ func NewTaskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 		if task.Repeat != "" {
 			_, err := NextDate(now, task.Date, task.Repeat)
 			if err != nil {
-				respondError(w, "Неверный формата правила повтора")
+				respondError(w, "Неверный формат правила повтора")
 				return
 			}
 		}
@@ -143,5 +143,99 @@ func GetTasksHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 		body, _ := json.Marshal(TasksResponse{Tasks: tasks})
 		w.WriteHeader(http.StatusOK)
 		w.Write(body)
+	}
+}
+
+func GetTaskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		id := r.URL.Query().Get("id")
+		if len(id) == 0 {
+			respondError(w, "Пустой ID")
+			return
+		}
+
+		db, err := sql.Open("sqlite", "scheduler.db")
+		if err != nil {
+			respondError(w, "Ошибка подключения к базе данных")
+			return
+		}
+		defer db.Close()
+
+		task, err := getTaskByID(db, id)
+		if err != nil {
+			respondError(w, "Задача с данным ID не найдена")
+			return
+		}
+
+		body, _ := json.Marshal(task)
+		w.WriteHeader(http.StatusOK)
+		w.Write(body)
+	}
+}
+
+func PutTaskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		now := time.Now()
+		db, err := sql.Open("sqlite", "scheduler.db")
+		if err != nil {
+			respondError(w, "Ошибка подключения к базе данных")
+			return
+		}
+		defer db.Close()
+
+		var task Task
+		var buf bytes.Buffer
+
+		_, err = buf.ReadFrom(r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if err = json.Unmarshal(buf.Bytes(), &task); err != nil {
+			respondError(w, "Неверный формат запроса")
+			return
+		}
+
+		_, err = getTaskByID(db, task.ID)
+		if err != nil {
+			respondError(w, "Задача с данным ID не найдена")
+			return
+		}
+
+		_, err = strconv.Atoi(task.ID)
+		if err != nil {
+			respondError(w, "Неверный ID")
+			return
+		}
+
+		if task.Title == "" {
+			respondError(w, "Не указан заголовок задачи")
+			return
+		}
+
+		if _, err = time.Parse(DateFormat, task.Date); err != nil {
+			respondError(w, "Неверный формат времени")
+			return
+		}
+
+		// TODO: add function to check the correct format
+		if task.Repeat != "" {
+			_, err := NextDate(now, task.Date, task.Repeat)
+			if err != nil {
+				respondError(w, "Неверный формат правила повтора")
+				return
+			}
+		}
+
+		id, err := updateTask(db, task)
+		if err != nil {
+			respondError(w, err.Error())
+			return
+		}
+
+		respondOk(w, strconv.Itoa(int(id)))
 	}
 }
