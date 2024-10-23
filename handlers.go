@@ -239,3 +239,9 @@ func PutTaskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 		respondOk(w, strconv.Itoa(int(id)))
 	}
 }
+
+func PostDoneTask(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+	}
+}
