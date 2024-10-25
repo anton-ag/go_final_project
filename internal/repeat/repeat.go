@@ -1,4 +1,4 @@
-package main
+package repeat
 
 import (
 	"fmt"
@@ -7,14 +7,12 @@ import (
 	"time"
 )
 
-const DateFormat = "20060102" // TODO: move to another block
-// TODO: fix returns
-
 func NextDate(now time.Time, date string, repeat string) (string, error) {
 	if repeat == "" {
-		return "", fmt.Errorf("пустое правило повторения")
+		return "", fmt.Errorf("Пустое правило повторения")
 	}
 
+	DateFormat := "20060102" // FIXME: move to constants
 	startDate, err := time.Parse(DateFormat, date)
 	if err != nil {
 		return "", fmt.Errorf("неверный формат даты: %v", err)
@@ -26,14 +24,14 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 	switch ruleLiteral {
 	case "d":
 		if len(rule) < 2 {
-			return "", fmt.Errorf("не указано количество дней")
+			return "", fmt.Errorf("Не указано количество дней")
 		}
 		daysN, err := strconv.Atoi(rule[1])
 		if err != nil {
-			return "", fmt.Errorf("неверное число дней: %v", err)
+			return "", fmt.Errorf("Неверное число дней: %v", err)
 		}
 		if daysN > 400 {
-			return "", fmt.Errorf("число дней не может превышать 400")
+			return "", fmt.Errorf("Число дней не может превышать 400")
 		}
 		newDate := startDate.AddDate(0, 0, daysN)
 		for newDate.Before(now) {
@@ -49,10 +47,9 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 		return newDate.Format(DateFormat), nil
 
 	default:
-		return "", fmt.Errorf("некорректный литерал правила")
+		return "", fmt.Errorf("Некорректный литерал правила")
 	}
 
 	// TODO: добавить правило для w
 	// TODO: добавить правило для m
-
 }
