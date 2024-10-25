@@ -5,12 +5,16 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/anton-ag/todolist/internal/config"
 	"github.com/go-chi/chi/v5"
 
 	_ "modernc.org/sqlite"
 )
 
 func main() {
+	var config config.Config
+	config.Init()
+
 	initDb()
 	db, err := sql.Open("sqlite", "scheduler.db")
 	if err != nil {
@@ -33,7 +37,7 @@ func main() {
 	r.Delete("/api/task", DeleteTaskHandler(db))
 
 	// launch server
-	err = http.ListenAndServe(":7540", r) // TODO: get port from env variables
+	err = http.ListenAndServe(config.Port, r)
 	if err != nil {
 		panic(err)
 	}
