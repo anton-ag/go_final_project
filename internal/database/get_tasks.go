@@ -13,7 +13,7 @@ func GetTasks(db *sql.DB, search string) ([]models.Task, error) {
 	var tasks []models.Task
 	var searchByDate string
 
-	searchByDate = "%%"
+	searchByDate = ""
 	dateParsed, err := time.Parse(models.SearchDateFormat, search)
 	if err == nil {
 		searchByDate = dateParsed.Format(models.DateFormat)
