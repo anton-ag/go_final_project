@@ -41,6 +41,6 @@ func main() {
 
 	err = http.ListenAndServe(config.Port, r)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Ошибка запуска сервера: %v", err)
 	}
 }
