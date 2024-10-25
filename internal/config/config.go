@@ -9,7 +9,8 @@ import (
 )
 
 type Config struct {
-	Port string
+	Port   string
+	DBFile string
 }
 
 func (c *Config) Init() {
@@ -19,4 +20,5 @@ func (c *Config) Init() {
 	}
 
 	c.Port = strings.Join([]string{":", os.Getenv("TODO_PORT")}, "")
+	c.DBFile = os.Getenv("TODO_DBFILE")
 }
