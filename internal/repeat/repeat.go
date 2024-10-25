@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/anton-ag/todolist/internal/models"
 )
 
 func NextDate(now time.Time, date string, repeat string) (string, error) {
@@ -12,10 +14,9 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 		return "", fmt.Errorf("Пустое правило повторения")
 	}
 
-	DateFormat := "20060102" // FIXME: move to constants
-	startDate, err := time.Parse(DateFormat, date)
+	startDate, err := time.Parse(models.DateFormat, date)
 	if err != nil {
-		return "", fmt.Errorf("неверный формат даты: %v", err)
+		return "", fmt.Errorf("Неверный формат даты: %v", err)
 	}
 
 	rule := strings.Split(repeat, " ")
@@ -24,7 +25,7 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 	switch ruleLiteral {
 	case "d":
 		if len(rule) < 2 {
-			return "", fmt.Errorf("Не указано количество дней")
+			return "", fmt.Errorf("Не указано число дней")
 		}
 		daysN, err := strconv.Atoi(rule[1])
 		if err != nil {
@@ -37,14 +38,14 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 		for newDate.Before(now) {
 			newDate = newDate.AddDate(0, 0, daysN)
 		}
-		return newDate.Format(DateFormat), nil
+		return newDate.Format(models.DateFormat), nil
 
 	case "y":
 		newDate := startDate.AddDate(1, 0, 0)
 		for newDate.Before(now) {
 			newDate = newDate.AddDate(1, 0, 0)
 		}
-		return newDate.Format(DateFormat), nil
+		return newDate.Format(models.DateFormat), nil
 
 	default:
 		return "", fmt.Errorf("Некорректный литерал правила")
