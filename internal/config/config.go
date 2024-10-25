@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -17,5 +18,5 @@ func (c *Config) Init() {
 		log.Println("Ошибка чтения из .env")
 	}
 
-	c.Port = os.Getenv("TODO_PORT")
+	c.Port = strings.Join([]string{":", os.Getenv("TODO_PORT")}, "")
 }
