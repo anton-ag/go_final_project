@@ -8,6 +8,7 @@ import (
 )
 
 const DateFormat = "20060102" // TODO: move to another block
+// TODO: fix returns
 
 func NextDate(now time.Time, date string, repeat string) (string, error) {
 	if repeat == "" {

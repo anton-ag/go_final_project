@@ -30,6 +30,8 @@ func main() {
 	r.Get("/api/tasks", GetTasksHandler(db))
 	r.Get("/api/task", GetTaskHandler(db))
 	r.Put("/api/task", PutTaskHandler(db))
+	r.Post("/api/task/done", PostDoneHandler(db))
+	r.Delete("/api/task", DeleteTaskHandler(db))
 
 	// launch server
 	err = http.ListenAndServe(":7540", r) // TODO: get port from env variables

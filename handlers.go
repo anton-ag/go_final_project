@@ -239,3 +239,88 @@ func PutTaskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 		respondOk(w, strconv.Itoa(int(id)))
 	}
 }
+
+// TODO: universalize error responses
+
+func PostDoneHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		id := r.FormValue("id")
+		now := time.Now()
+
+		db, err := sql.Open("sqlite", "scheduler.db")
+		if err != nil {
+			respondError(w, "Ошибка подключения к БД")
+			return
+		}
+		defer db.Close()
+
+		_, err = strconv.Atoi(id)
+		if err != nil {
+			respondError(w, "Неверный ID")
+			return
+		}
+
+		task, err := getTaskByID(db, id)
+		if err != nil {
+			respondError(w, "Задача с данным ID не найдена")
+			return
+		}
+
+		if task.Repeat == "" {
+			err := deleteTask(db, task.ID)
+			if err != nil {
+				respondError(w, "Ошибка удаления задачи")
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{})
+			return
+		}
+
+		task.Date, err = NextDate(now, task.Date, task.Repeat)
+		if err != nil {
+			respondError(w, err.Error())
+			return
+		}
+		_, err = updateTask(db, task)
+		if err != nil {
+			respondError(w, err.Error())
+			return
+		}
+		json.NewEncoder(w).Encode(map[string]interface{}{})
+	}
+}
+
+func DeleteTaskHandler(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		id := r.FormValue("id")
+
+		db, err := sql.Open("sqlite", "scheduler.db")
+		if err != nil {
+			respondError(w, "Ошибка подключения к БД")
+			return
+		}
+		defer db.Close()
+
+		_, err = strconv.Atoi(id)
+		if err != nil {
+			respondError(w, "Неверный ID")
+			return
+		}
+
+		_, err = getTaskByID(db, id)
+		if err != nil {
+			respondError(w, "Задача с данным ID не найдена")
+			return
+		}
+
+		err = deleteTask(db, id)
+		if err != nil {
+			respondError(w, "Ошибка удаления задачи")
+			return
+		}
+
+		json.NewEncoder(w).Encode(map[string]interface{}{})
+	}
+}
