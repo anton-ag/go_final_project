@@ -2,19 +2,24 @@ package database
 
 import (
 	"database/sql"
+	"strings"
 
 	"github.com/anton-ag/todolist/internal/models"
 )
 
-func GetTasks(db *sql.DB) ([]models.Task, error) {
+func GetTasks(db *sql.DB, search string) ([]models.Task, error) {
 	var task models.Task
 	var tasks []models.Task
 
-	query := "SELECT id, date, title, comment, repeat FROM scheduler ORDER BY date LIMIT :limit"
+	search = strings.Join([]string{"%", search, "%"}, "")
+
+	query := "SELECT id, date, title, comment, repeat FROM scheduler WHERE title LIKE :search OR comment LIKE :search ORDER BY date LIMIT :limit"
 	rows, err := db.Query(
 		query,
 		sql.Named("limit", models.Limit),
+		sql.Named("search", search),
 	)
+
 	if err != nil {
 		return nil, err
 	}
