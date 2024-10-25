@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-	// initialize database or use existent
 	initDb()
 	db, err := sql.Open("sqlite", "scheduler.db")
 	if err != nil {
