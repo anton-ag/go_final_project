@@ -28,6 +28,7 @@ func GetTasks(db *sql.DB, search string) ([]models.Task, error) {
 		sql.Named("search", search),
 		sql.Named("datesearch", searchByDate),
 	)
+	defer rows.Close()
 
 	if err != nil {
 		return nil, err
@@ -39,11 +40,13 @@ func GetTasks(db *sql.DB, search string) ([]models.Task, error) {
 		}
 		tasks = append(tasks, task)
 	}
-	if err = rows.Close(); err != nil {
-		return []models.Task{}, err
-	}
 	if len(tasks) == 0 {
 		return []models.Task{}, err
 	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return tasks, nil
 }

@@ -20,12 +20,6 @@ func DeleteTask(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_, err = database.GetTask(db, id)
-		if err != nil {
-			respondError(w, "Задача с данным ID не найдена")
-			return
-		}
-
 		err = database.DeleteTask(db, id)
 		if err != nil {
 			respondError(w, "Ошибка удаления задачи")
