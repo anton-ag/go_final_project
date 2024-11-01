@@ -1,6 +1,7 @@
 package models
 
 const DateFormat = "20060102"
+const SearchDateFormat = "02.01.2006"
 const Limit = 50
 
 type Task struct {

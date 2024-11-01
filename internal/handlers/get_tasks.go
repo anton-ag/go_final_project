@@ -11,9 +11,9 @@ import (
 func GetTasks(db *sql.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		search := r.URL.Query().Get("search")
 
-		// TODO: add search parameter
-		tasks, err := database.GetTasks(db)
+		tasks, err := database.GetTasks(db, search)
 		if err != nil {
 			respondError(w, err.Error())
 			return

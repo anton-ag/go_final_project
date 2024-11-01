@@ -39,8 +39,9 @@ func main() {
 	r.Post("/api/task/done", handlers.DoneTask(db))
 	r.Delete("/api/task", handlers.DeleteTask(db))
 
+	log.Printf("Запуск сервера на порту %s\n", config.Port)
 	err = http.ListenAndServe(config.Port, r)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Ошибка запуска сервера: %v", err)
 	}
 }
